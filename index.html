@@ -3,66 +3,155 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Doge Bridge</title>
+  <title>Dogemone - wDME Bridge</title>
+  <style>
+    /* Body styling */
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #d4af37, #c0c0c0);
+      font-family: Arial, sans-serif;
+      color: #333;
+      margin: 0;
+    }
+
+    /* Main container styling */
+    .container {
+      background: #ffffffdd;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      max-width: 400px;
+      width: 100%;
+      text-align: center;
+    }
+
+    /* Form and button styling */
+    h2 {
+      color: #333;
+      font-size: 24px;
+      margin-bottom: 16px;
+    }
+
+    label {
+      display: block;
+      margin: 10px 0 5px;
+      font-weight: bold;
+    }
+
+    input[type="text"],
+    input[type="number"] {
+      width: 100%;
+      padding: 8px;
+      margin-bottom: 15px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 16px;
+    }
+
+    .btn {
+      background: linear-gradient(135deg, #ffd700, #c0c0c0);
+      color: #333;
+      padding: 10px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 16px;
+      transition: background 0.3s;
+      width: 100%;
+      margin-top: 10px;
+    }
+
+    .btn:hover {
+      background: linear-gradient(135deg, #c0c0c0, #ffd700);
+    }
+
+    .result {
+      font-size: 14px;
+      margin-top: 10px;
+      color: #333;
+    }
+  </style>
 </head>
 <body>
-  <h2>Dogemone - wDME Bridge</h2>
+  <div class="container">
+    <h2>Dogemone - wDME Bridge</h2>
 
-  <div>
-    <h3>Mint wDME</h3>
-    <form id="mintForm">
-      <label>Recipient Address (Polygon):</label>
-      <input type="text" id="mintRecipient" required><br>
-      <label>Amount:</label>
-      <input type="number" id="mintAmount" required><br>
-      <button type="submit">Mint wDME</button>
-    </form>
-    <p id="mintResult"></p>
-  </div>
+    <!-- Mint Section -->
+    <div id="mint-section">
+      <h3>Convert DME to wDME</h3>
+      <form id="mintForm">
+        <label>Polygon Recipient Address:</label>
+        <input type="text" id="mintRecipient" placeholder="Enter Polygon address" required>
 
-  <div>
-    <h3>Burn wDME</h3>
-    <form id="burnForm">
-      <label>Amount:</label>
-      <input type="number" id="burnAmount" required><br>
-      <button type="submit">Burn wDME</button>
-    </form>
-    <p id="burnResult"></p>
+        <label>Amount of DME:</label>
+        <input type="number" id="mintAmount" placeholder="Amount in DME" required>
+
+        <button type="submit" class="btn">Mint wDME</button>
+      </form>
+      <p id="mintResult" class="result"></p>
+    </div>
+
+    <!-- Burn Section -->
+    <div id="burn-section" style="margin-top: 20px;">
+      <h3>Convert wDME to DME</h3>
+      <form id="burnForm">
+        <label>Amount of wDME:</label>
+        <input type="number" id="burnAmount" placeholder="Amount in wDME" required>
+
+        <label>Dogemone Recipient Address:</label>
+        <input type="text" id="burnRecipient" placeholder="Enter Dogemone address" required>
+
+        <button type="submit" class="btn">Burn wDME & Receive DME</button>
+      </form>
+      <p id="burnResult" class="result"></p>
+    </div>
   </div>
 
   <script>
-    document.getElementById("mintForm").addEventListener("submit", async (e) => {
+    // Function to handle minting wDME
+    async function handleMint(e) {
       e.preventDefault();
       const recipient = document.getElementById("mintRecipient").value;
       const amount = document.getElementById("mintAmount").value;
 
-      const response = await fetch("http://95.179.212.172:5000/bridge/mint", {
+      // Fetch call to mint wDME (backend endpoint)
+      const response = await fetch("http://localhost:5000/bridge/mint", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ recipient, amount })
       });
 
       const result = await response.json();
-      document.getElementById("mintResult").innerText = JSON.stringify(result);
-    });
+      document.getElementById("mintResult").innerText = result.status ?
+        `Minting successful! Transaction hash: ${result.tx_hash}` :
+        `Error: ${result.error}`;
+    }
 
-    document.getElementById("burnForm").addEventListener("submit", async (e) => {
+    // Function to handle burning wDME
+    async function handleBurn(e) {
       e.preventDefault();
       const amount = document.getElementById("burnAmount").value;
+      const recipient = document.getElementById("burnRecipient").value;
 
-      const response = await fetch("http://95.179.212.172:5000/bridge/burn", {
+      // Fetch call to burn wDME and receive DME (backend endpoint)
+      const response = await fetch("http://localhost:5000/bridge/burn", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ amount })
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ amount, recipient })
       });
 
       const result = await response.json();
-      document.getElementById("burnResult").innerText = JSON.stringify(result);
-    });
+      document.getElementById("burnResult").innerText = result.status ?
+        `Burning successful! Transaction hash: ${result.tx_hash}` :
+        `Error: ${result.error}`;
+    }
+
+    document.getElementById("mintForm").addEventListener("submit", handleMint);
+    document.getElementById("burnForm").addEventListener("submit", handleBurn);
   </script>
 </body>
 </html>
