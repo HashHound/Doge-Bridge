@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Doge Bridge</title>
+</head>
+<body>
+  <h2>Dogemone - wDME Bridge</h2>
+
+  <div>
+    <h3>Mint wDME</h3>
+    <form id="mintForm">
+      <label>Recipient Address (Polygon):</label>
+      <input type="text" id="mintRecipient" required><br>
+      <label>Amount:</label>
+      <input type="number" id="mintAmount" required><br>
+      <button type="submit">Mint wDME</button>
+    </form>
+    <p id="mintResult"></p>
+  </div>
+
+  <div>
+    <h3>Burn wDME</h3>
+    <form id="burnForm">
+      <label>Amount:</label>
+      <input type="number" id="burnAmount" required><br>
+      <button type="submit">Burn wDME</button>
+    </form>
+    <p id="burnResult"></p>
+  </div>
+
+  <script>
+    document.getElementById("mintForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const recipient = document.getElementById("mintRecipient").value;
+      const amount = document.getElementById("mintAmount").value;
+
+      const response = await fetch("http://95.179.212.172:5000/bridge/mint", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ recipient, amount })
+      });
+
+      const result = await response.json();
+      document.getElementById("mintResult").innerText = JSON.stringify(result);
+    });
+
+    document.getElementById("burnForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const amount = document.getElementById("burnAmount").value;
+
+      const response = await fetch("http://95.179.212.172:5000/bridge/burn", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ amount })
+      });
+
+      const result = await response.json();
+      document.getElementById("burnResult").innerText = JSON.stringify(result);
+    });
+  </script>
+</body>
+</html>
